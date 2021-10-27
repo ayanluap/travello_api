@@ -1,0 +1,39 @@
+{
+  "name": "travello_api",
+  "version": "1.0.0",
+  "description": "A travel app which provides you a smooth experience to book your journey.",
+  "main": "app.js",
+  "type": "module",
+  "scripts": {
+    "start": "nodemon server.js",
+    "start:prod": "NODE_ENV=production nodemon server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ayanluap/travello_api.git"
+  },
+  "author": "ayanabha paul",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ayanluap/travello_api/issues"
+  },
+  "homepage": "https://github.com/ayanluap/travello_api#readme",
+  "dependencies": {
+    "colors": "^1.4.0",
+    "dotenv": "^10.0.0",
+    "express": "^4.17.1",
+    "mongoose": "^6.0.12",
+    "morgan": "^1.10.0"
+  },
+  "devDependencies": {
+    "eslint": "^7.32.0",
+    "eslint-config-airbnb": "^18.2.1",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-import": "^2.25.2",
+    "eslint-plugin-jsx-a11y": "^6.4.1",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-prettier": "^4.0.0",
+    "eslint-plugin-react": "^7.26.1",
+    "prettier": "^2.4.1"
+  }
+}
