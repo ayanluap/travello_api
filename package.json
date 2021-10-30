@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "start": "nodemon server.js",
-    "start:prod": "NODE_ENV=production node server.js",
+    "start:prod": "NODE_ENV=production nodemon server.js",
     "data:import": "node dev-data/data/seeder.js --import",
     "data:delete": "node dev-data/data/seeder.js --delete"
   },
@@ -27,7 +27,8 @@
     "moment": "^2.29.1",
     "mongoose": "^6.0.12",
     "morgan": "^1.10.0",
-    "slugify": "^1.6.1"
+    "slugify": "^1.6.1",
+    "validator": "^13.6.0"
   },
   "devDependencies": {
     "eslint": "^7.32.0",
