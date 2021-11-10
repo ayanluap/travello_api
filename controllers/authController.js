@@ -10,6 +10,28 @@ const getJwtToken = (id) => {
     expiresIn: process.env.JWT_EXPIRES_IN,
   });
 };
+
+const createAndSendToken = (user, statusCode, req, res) => {
+  const token = getJwtToken(user._id);
+
+  const cookieOptions = {
+    expires: new Date(
+      Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000
+    ),
+    httpOnly: true, // prevent XSS
+  };
+
+  if (process.env.NODE_ENV === 'production') cookieOptions.secure = true; // works only on https
+
+  res.cookie('jwt', token, cookieOptions);
+
+  // hide/remove password field from output
+  user.password = undefined;
+  return res
+    .status(statusCode)
+    .json({ status: 'success', token, data: { user } });
+};
+
 ////////////////////////////////////////////////////////////////////////////////
 export const signUp = asyncHandler(async (req, res, next) => {
   const { name, email, password, passwordConfirm, role } = req.body;
@@ -22,10 +44,9 @@ export const signUp = asyncHandler(async (req, res, next) => {
     passwordChangedAt: Date.now(),
   });
 
-  const token = getJwtToken(newUser._id);
   if (!newUser) return next(new AppError('Error while signing up!', 400));
 
-  res.status(201).json({ status: 'success', token, data: { user: newUser } });
+  createAndSendToken(newUser, 201, req, res);
 });
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -39,8 +60,7 @@ export const login = asyncHandler(async (req, res, next) => {
   if (!user || !(await user.verifyPassword(user.password, enteredPassword)))
     return next(new AppError('Wrong email or password', 401));
 
-  const token = getJwtToken(user._id);
-  res.status(200).json({ status: 'success', token, user });
+  createAndSendToken(user, 200, req, res);
 });
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -154,11 +174,7 @@ export const resetPassword = asyncHandler(async (req, res, next) => {
   user.passwordResetTokenExpiresIn = undefined;
   await user.save();
 
-  const token = getJwtToken(user._id);
-
-  res
-    .status(200)
-    .json({ status: 'success', token, message: 'Password updated!' });
+  createAndSendToken(user, 200, req, res);
 });
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -180,10 +196,5 @@ export const updatePassword = asyncHandler(async (req, res, next) => {
   await user.save();
 
   // send token
-  const token = getJwtToken(user._id);
-  res.status(200).json({
-    status: 'success',
-    token,
-    message: 'Congrats! Your has been updated!',
-  });
+  createAndSendToken(user, 200, req, res);
 });
