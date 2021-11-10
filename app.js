@@ -24,6 +24,10 @@ app.patch('/api/v1/tours/:id', updateTour);
 app.delete('/api/v1/tours/:id', deleteTour); */
 
 // OR (For cleaner code)
+// app.use((req, res, next) => {
+//   console.log(req.headers.authorization);
+//   next();
+// });
 
 app.use('/api/v1/tours', tourRoutes);
 app.use('/api/v1/users', userRoutes);
@@ -34,6 +38,6 @@ app.all('*', (req, res, next) => {
   );
 });
 
-app.use(globalErrorHandler); 
+app.use(globalErrorHandler);
 
 export default app;

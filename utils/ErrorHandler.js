@@ -29,13 +29,20 @@ const handleCastErrorDB = (err) => {
   return new AppError(msg, 400);
 };
 const handleMongoServerErrorDB = (err) => {
-  const msg = `Duplicate field value : ${err.keyValue.name}`;
+  const duplicateErr = Object.values(err.keyValue).join('. ');
+  const msg = `Duplicate field value : ${duplicateErr}`;
   return new AppError(msg, 400);
 };
 const handleValidationErrorDB = (err) => {
   const allErr = Object.values(err.errors).map((el) => el.message);
   const msg = `Invalid input : ${allErr.join('. ')}`;
   return new AppError(msg, 400);
+};
+const handleJWTError = (err) => {
+  return new AppError('Invalid token! Please, login again!', 401);
+};
+const handleTokenExpireError = (err) => {
+  return new AppError('Token Expired! Please, login again!', 401);
 };
 
 const sendErrProd = (err, res) => {
@@ -59,6 +66,10 @@ export const globalErrorHandler = (err, req, res, next) => {
     if (err.code === 11000) customError = handleMongoServerErrorDB(customError);
     if (err.name === 'ValidationError')
       customError = handleValidationErrorDB(customError);
+    if (err.name === 'JsonWebTokenError')
+      customError = handleJWTError(customError);
+    if (err.name === 'TokenExpiredError')
+      customError = handleTokenExpireError(customError);
 
     sendErrProd(customError, res);
   }
