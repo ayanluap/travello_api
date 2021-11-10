@@ -1,5 +1,5 @@
 .prettierrc
 
-/node_mudules
+/node_modules
 
-config.env
+/config.env
