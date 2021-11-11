@@ -3,6 +3,12 @@ import colors from 'colors';
 import morgan from 'morgan';
 import dotenv from 'dotenv';
 import rateLimit from 'express-rate-limit';
+import helmet from 'helmet';
+import ExpressMongoSanitize from 'express-mongo-sanitize';
+import xss from 'xss-clean';
+import hpp from 'hpp';
+import cookieParser from 'cookie-parser';
+
 import tourRoutes from './routes/tourRoutes.js';
 import userRoutes from './routes/userRoutes.js';
 import { AppError, globalErrorHandler } from './utils/ErrorHandler.js';
@@ -10,6 +16,9 @@ import { AppError, globalErrorHandler } from './utils/ErrorHandler.js';
 dotenv.config({ path: './config.env' });
 
 const app = express();
+
+// some imoprtant headers for security using helmet
+app.use(helmet());
 
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
@@ -20,9 +29,27 @@ const limiter = rateLimit({
   windowMs: 60 * 60 * 1000,
   message: 'Too many request from this IP, Try again in an hour!',
 });
-
 app.use('/api', limiter);
-app.use(express.json()); // can use custom middleware
+app.use(express.json({ limit: '100kb' })); // can use custom middleware
+app.use(cookieParser);
+
+// Data sanitization against NOSQL query injection
+app.use(ExpressMongoSanitize());
+// Data sanitization against XSS
+app.use(xss());
+// HTTP parameter pollution
+app.use(
+  hpp({
+    whitelist: [
+      'duration',
+      'ratingsQuantity',
+      'ratingsAverage',
+      'maxGroupSize',
+      'difficulty',
+      'price',
+    ],
+  })
+);
 
 /*
 app.get('/api/v1/tours', getAllTours);
@@ -32,11 +59,6 @@ app.patch('/api/v1/tours/:id', updateTour);
 app.delete('/api/v1/tours/:id', deleteTour); */
 
 // OR (For cleaner code)
-// app.use((req, res, next) => {
-//   console.log(req.headers.authorization);
-//   next();
-// });
-
 app.use('/api/v1/tours', tourRoutes);
 app.use('/api/v1/users', userRoutes);
 
