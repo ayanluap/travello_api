@@ -1,5 +1,7 @@
 import mongoose from 'mongoose';
 import slugify from 'slugify';
+import { AppError } from '../utils/ErrorHandler.js';
+import { User } from './userModel.js';
 
 const tourSchema = new mongoose.Schema(
   {
@@ -63,20 +65,61 @@ const tourSchema = new mongoose.Schema(
     },
     startDates: [Date],
     secretTour: { type: Boolean, default: false },
+    startLocation: {
+      type: {
+        type: String,
+        default: 'Point', // other options can be of any shapes/ polygons etc.
+        enum: ['Point'],
+      },
+      coordinates: [Number],
+      description: String,
+      address: String,
+    },
+    locations: [
+      {
+        type: {
+          type: String,
+          default: 'Point',
+          enum: ['Point'],
+        },
+        coordinates: [Number],
+        description: String,
+        address: String,
+        day: Number,
+      },
+    ],
+    // guides: [{ type: Array }], Embedding (Denormalised form) This need to import the referenced Document (User model) to import
+    guides: [
+      {
+        type: mongoose.Schema.ObjectId,
+        // Referencing (Normalised form) This need doesnt need to import referenced Document
+        // Also called Child Referencing
+        ref: 'User', 
+      },
+    ],
   },
+  // When we do not have any property in DB but want to show in output In that case this is very handy
   { toJSON: { virtuals: true }, toObject: { virtuals: true } }
 );
+
+// In order to retrieve data of the users after referecing we need to populate the data so that instead of returning us only the ID of the user it returns the referenced object. We'll add polpulate query in the TOUR CONTROLLER!!!
 
 tourSchema.virtual('durationWeeks').get(function () {
   return this.duration / 7;
 });
+
 tourSchema.virtual('slug').get(function () {
   return slugify(this.name, { lower: true });
 });
 
 // Document middleware mongoose [work on .save() & .create() not on .update()]
-// tourSchema.pre('save', function (next) {
-//   this.slug = slugify(this.name, { lower: true });
+
+// Embedding (Denormalisation)
+// tourSchema.pre('save', async function (next) {
+//   const guidesPromises = this.guides.map(async (id) => await User.findById(id)); //res var will be full of promises
+//   this.guides = await Promise.all(guidesPromises).catch((err) =>
+//     next(new AppError('Enter a valid user Id', 400))
+//   );
 //   next();
 // });
 

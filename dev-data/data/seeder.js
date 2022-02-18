@@ -19,7 +19,7 @@ const __dirname = path.resolve();
 const importData = async () => {
   try {
     const tours = JSON.parse(
-      fs.readFileSync(`${__dirname}/dev-data/data/tours-simple.json`, 'utf-8')
+      fs.readFileSync(`${__dirname}/dev-data/data/tours.json`, 'utf-8')
     );
     await Tour.deleteMany();
     console.log('Previous data deleted...'.cyan);

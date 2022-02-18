@@ -15,7 +15,7 @@ import { AppError, asyncHandler } from '../utils/ErrorHandler.js';
 // };
 //
 
-export const getTopTours = (req, res) => {
+export const getTopTours = (req, res, next) => {
   req.query.sort = '-ratingsAverage,price';
   req.query.limit = '5';
   next();
@@ -37,7 +37,10 @@ export const getAllTours = asyncHandler(async (req, res, next) => {
 });
 
 export const getTour = asyncHandler(async (req, res, next) => {
-  const tour = await Tour.findById(req.params.id);
+  const tour = await Tour.findById(req.params.id).populate({
+    path: 'guides',
+    select: '-__v -passwordChangedAt',
+  });
 
   if (!tour) {
     return next(

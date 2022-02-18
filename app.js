@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { request } from 'express';
 import colors from 'colors';
 import morgan from 'morgan';
 import dotenv from 'dotenv';
@@ -7,10 +7,12 @@ import helmet from 'helmet';
 import ExpressMongoSanitize from 'express-mongo-sanitize';
 import xss from 'xss-clean';
 import hpp from 'hpp';
+// import { cookieParser } from 'cookie-parser';
 import cookieParser from 'cookie-parser';
 
 import tourRoutes from './routes/tourRoutes.js';
 import userRoutes from './routes/userRoutes.js';
+import reviewRoutes from './routes/reviewRoutes.js';
 import { AppError, globalErrorHandler } from './utils/ErrorHandler.js';
 
 dotenv.config({ path: './config.env' });
@@ -30,8 +32,8 @@ const limiter = rateLimit({
   message: 'Too many request from this IP, Try again in an hour!',
 });
 app.use('/api', limiter);
-app.use(express.json({ limit: '100kb' })); // can use custom middleware
-app.use(cookieParser);
+app.use(express.json()); // can use custom middleware
+app.use(cookieParser());
 
 // Data sanitization against NOSQL query injection
 app.use(ExpressMongoSanitize());
@@ -61,6 +63,7 @@ app.delete('/api/v1/tours/:id', deleteTour); */
 // OR (For cleaner code)
 app.use('/api/v1/tours', tourRoutes);
 app.use('/api/v1/users', userRoutes);
+app.use('/api/v1/reviews', reviewRoutes);
 
 app.all('*', (req, res, next) => {
   next(

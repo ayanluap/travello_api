@@ -14,6 +14,8 @@ const getJwtToken = (id) => {
 const createAndSendToken = (user, statusCode, req, res) => {
   const token = getJwtToken(user._id);
 
+  // HttpOnly means the client script can't access the cookie, as well as you can't read it from document.cookie and pass to axios.
+  // In fact, HttpOnly cookie is more secure than http request headers I think. What you need is parsing the auth cookie in the server side, instead of parsing the request header.
   const cookieOptions = {
     expires: new Date(
       Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000
