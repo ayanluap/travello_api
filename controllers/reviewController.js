@@ -25,9 +25,9 @@ export const createReviews = asyncHandler(async (req, res, next) => {
     return next(new AppError(`Bad request sent on ID : ${req.params.id}`, 401));
   }
 
-  if(newReview) {
-      
-  }
+  //   if(newReview) {
+
+  //   }
 
   res.status(201).json({
     status: 'success',
