@@ -38,10 +38,16 @@ const reviewSchema = new mongoose.Schema(
 
 // Query middleware
 reviewSchema.pre(/^find/, function (next) {
-  this.populate({ path: 'user', select: 'name email photo' }).populate({
+//////NOTE -> Polpulating fields is ok for small arrays larger arrays may increace the time of the query/////
+
+  this.populate({
+    path: 'user',
+    select: 'name photo',
+  }).populate({
     path: 'tour',
     select: 'name',
   });
+
   next();
 });
 
