@@ -60,7 +60,6 @@ userSchema.pre(/^find/, function (next) {
 });
 
 // Best place to encrypt users password is at the moment we recieve it from them
-
 userSchema.pre('save', async function (next) {
   // only run this func if password is modified
   if (!this.isModified('password')) return next();

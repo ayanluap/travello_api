@@ -23,6 +23,27 @@ export const getAllUsers = asyncHandler(async (req, res, next) => {
     .json({ status: 'success', results: users.length, data: { users } });
 });
 
+export const getUser = asyncHandler(async (req, res, next) => {
+  const user = await User.findById(req.params.id);
+
+  if (!user) {
+    return next(
+      new AppError(`Can not found any User with ID : ${req.params.id}`, 404)
+    );
+  }
+
+  res.status(201).json({
+    status: 'success',
+    data: { user },
+  });
+});
+
+// It always good practice to have a getme controller where user can see his/her own data
+export const getMe = asyncHandler(async (req, res, next) => {
+  req.params.id = req.user.id;
+  next();
+});
+
 export const updateMe = asyncHandler(async (req, res, next) => {
   if (req.body.password || req.body.passwordConfirm)
     return next(
@@ -53,10 +74,32 @@ export const deleteMe = asyncHandler(async (req, res, next) => {
   res.status(204).json({ status: 'success', data: null });
 });
 
-export const createUser = (req, res) => {};
+// Never update passwords with this!!!!
+export const updateUser = asyncHandler(async (req, res, next) => {
+  const updatedUser = await User.findByIdAndUpdate(req.params.id, req.body, {
+    new: true,
+    runValidators: true,
+  });
 
-export const getUser = (req, res) => {};
+  if (!updatedUser) {
+    return next(
+      new AppError(`Can not found any Tour with ID : ${req.params.id}`, 404)
+    );
+  }
+  res.status(200).json({ status: 'success', data: { user: updatedUser } });
+});
 
-export const updateUser = (req, res) => {};
+export const deleteUser = asyncHandler(async (req, res, next) => {
+  const deleteUser = await User.findByIdAndDelete(req.params.id);
 
-export const deleteUser = (req, res) => {};
+  if (!deleteUser) {
+    return next(
+      new AppError(`Can not found any User with ID : ${req.params.id}`, 404)
+    );
+  }
+
+  res.status(204).json({
+    status: 'success',
+    data: null,
+  });
+});

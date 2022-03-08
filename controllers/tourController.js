@@ -27,6 +27,7 @@ export const getAllTours = asyncHandler(async (req, res, next) => {
     .sort()
     .limitFields()
     .paginate();
+
   const tours = await features.query;
 
   res.status(200).json({
@@ -37,10 +38,12 @@ export const getAllTours = asyncHandler(async (req, res, next) => {
 });
 
 export const getTour = asyncHandler(async (req, res, next) => {
-  const tour = await Tour.findById(req.params.id).populate({
-    path: 'guides',
-    select: '-__v -passwordChangedAt',
-  });
+  const tour = await Tour.findById(req.params.id)
+    .populate({
+      path: 'guides',
+      select: '-__v -passwordChangedAt',
+    })
+    .populate('reviews');
 
   if (!tour) {
     return next(

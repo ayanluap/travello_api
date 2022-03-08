@@ -32,9 +32,9 @@ const tourSchema = new mongoose.Schema(
     },
     ratingsAverage: {
       type: Number,
-      default: 0,
-      min: [1, 'Ratings must be between 1 to 5'],
-      max: [5, 'Ratings must be between 1 to 5'],
+      default: 4.5,
+      min: [1, 'Rating must be above 1.0'],
+      max: [5, 'Rating must be below 5.0'],
     },
     ratingsQuantity: { type: Number, default: 0 },
     price: { type: Number, required: [true, 'Price should not be empty!'] },
@@ -94,13 +94,24 @@ const tourSchema = new mongoose.Schema(
         type: mongoose.Schema.ObjectId,
         // Referencing (Normalised form) This need doesnt need to import referenced Document
         // Also called Child Referencing
-        ref: 'User', 
+        ref: 'User',
       },
     ],
+    // reviews: [  ---> Instead of doing this do virtual population which reduce the data redundancy
+    //   {
+    //     type: mongoose.Schema.ObjectId,
+    //     ref: 'Review',
+    //   },
+    // ],
   },
   // When we do not have any property in DB but want to show in output In that case this is very handy
   { toJSON: { virtuals: true }, toObject: { virtuals: true } }
 );
+
+// ONE MIND BLOWING FEATURE WHICH DRASTICALLY REDUCE COMPLEXITY OF SEACH IN DB --> INDEXES
+// could be a great use in case of filtering!!!!
+// tourSchema.index({ price: 1 });
+tourSchema.index({ price: 1, ratingsAverage: -1 }); // Coumpound indexing
 
 // In order to retrieve data of the users after referecing we need to populate the data so that instead of returning us only the ID of the user it returns the referenced object. We'll add polpulate query in the TOUR CONTROLLER!!!
 
@@ -108,13 +119,22 @@ tourSchema.virtual('durationWeeks').get(function () {
   return this.duration / 7;
 });
 
+// virtual populate
+tourSchema.virtual('reviews', {
+  ref: 'Review', // refer to the model
+  foreignField: 'tour', // from which field from the referenced table we can get the data? --> tour
+  localField: '_id', // from which field we can get reference from the current table? --> _id
+});
+
 tourSchema.virtual('slug').get(function () {
   return slugify(this.name, { lower: true });
 });
 
+tourSchema.index({ slug: 1 }); // Sometimes 1/-1 is not that imp. like in strings
+
 // Document middleware mongoose [work on .save() & .create() not on .update()]
 
-// Embedding (Denormalisation)
+// Embedding (Denormalisation) ---> Not preffered it may increase Redundancy and Time complexity
 // tourSchema.pre('save', async function (next) {
 //   const guidesPromises = this.guides.map(async (id) => await User.findById(id)); //res var will be full of promises
 //   this.guides = await Promise.all(guidesPromises).catch((err) =>
